@@ -2,162 +2,518 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#0a0d14">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#080c14">
+  <meta name="description" content="StudyUp: organiza tus sesiones, gana experiencia y domina tus materias.">
+
   <title>StudyUp | Study smarter. Rank higher.</title>
+
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
+
   <div class="app-shell">
 
+    <!-- HEADER -->
+
     <header class="topbar">
-      <div class="brand">
-        <span class="brand-mark">S<span>+</span></span>
-        <div>
+
+      <a class="brand" href="#home" aria-label="Ir al inicio">
+
+        <span class="brand-mark">
+          S<span>+</span>
+        </span>
+
+        <span class="brand-copy">
           <strong>Study<span>Up</span></strong>
           <small>STUDY SMARTER. RANK HIGHER.</small>
-        </div>
-      </div>
-      <button id="themeBtn" class="icon-btn">☼</button>
+        </span>
+
+      </a>
+
+      <button
+        id="themeBtn"
+        class="icon-btn"
+        type="button"
+        aria-label="Cambiar tema">
+        ☼
+      </button>
+
     </header>
 
-    <main>
+    <!-- MAIN -->
+
+    <main id="home">
+
+      <!-- INICIO -->
 
       <section class="welcome" id="home-section">
+
         <div>
-          <p class="eyebrow">TU PROGRESO, TU JUEGO</p>
-          <h1>Subí de nivel.<br><span>Domina tus materias.</span></h1>
-          <p class="muted">Cada minuto cuenta. Hoy es un buen día para avanzar.</p>
+
+          <p class="eyebrow">
+            TU PROGRESO, TU JUEGO
+          </p>
+
+          <h1>
+            Subí de nivel.<br>
+            <span>Dominá tus materias.</span>
+          </h1>
+
+          <p class="muted">
+            Cada minuto cuenta.
+            Hoy es un buen día para avanzar.
+          </p>
+
         </div>
 
         <div class="rank-badge">
+
           <span>RANGO SEMANAL</span>
-          <strong id="overallRank">HIERRO III</strong>
-          <div class="rank-gem">✦</div>
-          <small id="weeklyHours">0.0 h esta semana</small>
+
+          <strong id="overallRank">
+            HIERRO III
+          </strong>
+
+          <div class="rank-gem">
+            ✦
+          </div>
+
+          <small id="weeklyHours">
+            0.0 h esta semana
+          </small>
+
         </div>
+
       </section>
+
+      <!-- ESTADÍSTICAS -->
 
       <section class="stats-grid">
+
         <article class="stat-card">
-          <span class="stat-label">XP TOTAL</span>
-          <strong id="totalXp">0</strong>
-          <small>Experiencia acumulada</small>
+
+          <span class="stat-label">
+            XP TOTAL
+          </span>
+
+          <strong id="totalXp">
+            0
+          </strong>
+
+          <small>
+            Experiencia acumulada
+          </small>
+
         </article>
 
         <article class="stat-card">
-          <span class="stat-label">NIVEL</span>
-          <strong id="level">1</strong>
-          <small id="nextLevel">500 XP para subir</small>
+
+          <span class="stat-label">
+            NIVEL
+          </span>
+
+          <strong id="level">
+            1
+          </strong>
+
+          <small id="nextLevel">
+            500 XP para subir
+          </small>
+
         </article>
 
         <article class="stat-card">
-          <span class="stat-label">RACHA</span>
-          <strong><span id="streak">0</span> días</strong>
-          <small>¡No rompas el ritmo!</small>
+
+          <span class="stat-label">
+            RACHA
+          </span>
+
+          <strong>
+            <span id="streak">0</span> días
+          </strong>
+
+          <small>
+            ¡No rompas el ritmo!
+          </small>
+
         </article>
+
       </section>
 
-      <section class="section-card timer-card" id="study">
+      <!-- CRONÓMETRO -->
+
+      <section
+        class="section-card timer-card"
+        id="study">
+
         <div class="section-heading">
+
           <div>
-            <p class="eyebrow">MODO ENFOQUE</p>
-            <h2>Sesión de estudio</h2>
+
+            <p class="eyebrow">
+              MODO ENFOQUE
+            </p>
+
+            <h2>
+              Sesión de estudio
+            </h2>
+
           </div>
+
+          <span class="rank-badge">
+            ＋ XP por minuto
+          </span>
+
         </div>
 
-        <label for="subjectSelect">¿Qué vas a estudiar?</label>
+        <label for="subjectSelect">
+          ¿Qué vas a estudiar?
+        </label>
 
         <div class="timer-controls">
-          <select id="subjectSelect"></select>
-          <button id="addSubject" class="secondary-btn">＋ Materia</button>
+
+          <select id="subjectSelect"
+            aria-label="Seleccionar materia">
+          </select>
+
+          <button
+            id="addSubject"
+            class="secondary-btn"
+            type="button">
+            ＋ Materia
+          </button>
+
         </div>
 
-        <div class="timer-display" id="timer">00:00:00</div>
+        <div
+          class="timer-display"
+          id="timer"
+          role="timer">
+          00:00:00
+        </div>
 
         <div class="timer-actions">
-          <button id="startBtn" class="primary-btn">▶ Iniciar sesión</button>
-          <button id="resetBtn" class="secondary-btn">↺ Reiniciar</button>
-          <button id="saveBtn" class="secondary-btn" disabled>✓ Guardar</button>
+
+          <button
+            id="startBtn"
+            class="primary-btn"
+            type="button">
+            ▶ Iniciar sesión
+          </button>
+
+          <button
+            id="resetBtn"
+            class="secondary-btn"
+            type="button">
+            ↺ Reiniciar
+          </button>
+
+          <button
+            id="saveBtn"
+            class="secondary-btn"
+            type="button"
+            disabled>
+            ✓ Guardar
+          </button>
+
         </div>
 
-        <p class="hint">Ganas 2 XP por minuto de estudio registrado.</p>
-      </section>
-
-      <section class="content-grid">
-
-      <section class="section-card" id="subjects">
-          <p class="eyebrow">TU UNIVERSIDAD</p>
-          <h2>Mis materias</h2>
-          <div id="subjectsList"></div>
-          <button id="manageSubjects" class="text-btn">Gestionar materias</button>
-        </section>
-
-        <section class="section-card" id="missions">
-          <p class="eyebrow">SIGUE AVANZANDO</p>
-          <h2>Misiones semanales</h2>
-          <span id="missionCount">0/3</span>
-          <div id="missions"></div>
-        </section>
+        <p class="hint">
+          Ganá 2 XP por cada minuto de estudio registrado.
+        </p>
 
       </section>
 
-      <section class="content-grid">
+      <!-- MATERIAS Y MISIONES -->
 
-        <section class="section-card">
-          <p class="eyebrow">REPASO ACTIVO</p>
-          <h2>Flashcards</h2>
+      <div class="content-grid">
 
-          <section class="section-card" id="flashcards">
-            <p id="cardQuestion">Añade una flashcard para comenzar.</p>
-            <p id="cardAnswer" class="hidden"></p>
-            <button id="flipCard" class="secondary-btn">Mostrar respuesta</button>
-            <button id="nextCard" class="text-btn">Siguiente →</button>
+        <section
+          class="section-card"
+          id="subjects-panel">
+
+          <p class="eyebrow">
+            TU UNIVERSIDAD
+          </p>
+
+          <h2>
+            Mis materias
+          </h2>
+
+          <div
+            id="subjectsList"
+            class="subject-list">
           </div>
 
-          <button id="addCard" class="text-btn">＋ Crear flashcard</button>
+          <button
+            id="manageSubjects"
+            class="text-btn"
+            type="button">
+            Gestionar materias
+          </button>
+
         </section>
 
-        <section class="section-card">
-          <p class="eyebrow">TU ACTIVIDAD</p>
-          <h2>Últimas sesiones</h2>
-          <div id="sessionHistory"></div>
+        <section
+          class="section-card"
+          id="missions-panel">
+
+          <p class="eyebrow">
+            SEGUÍ AVANZANDO
+          </p>
+
+          <h2>
+            Misiones semanales
+            <span id="missionCount">0/3</span>
+          </h2>
+
+          <div
+            id="missions"
+            class="mission-list">
+          </div>
+
         </section>
 
-      </section>
+      </div>
+
+      <!-- FLASHCARDS E HISTORIAL -->
+
+      <div class="content-grid">
+
+        <section
+          class="section-card"
+          id="flashcards-panel">
+
+          <p class="eyebrow">
+            REPASO ACTIVO
+          </p>
+
+          <h2>
+            Flashcards
+          </h2>
+
+          <div
+            class="flashcard"
+            id="flashcard">
+
+            <p id="cardQuestion">
+              Añadí una flashcard para comenzar.
+            </p>
+
+            <p
+              id="cardAnswer"
+              class="hidden">
+            </p>
+
+          </div>
+
+          <div class="timer-actions">
+
+            <button
+              id="flipCard"
+              class="secondary-btn"
+              type="button">
+              Mostrar respuesta
+            </button>
+
+            <button
+              id="nextCard"
+              class="text-btn"
+              type="button">
+              Siguiente →
+            </button>
+
+          </div>
+
+          <button
+            id="addCard"
+            class="text-btn"
+            type="button">
+            ＋ Crear flashcard
+          </button>
+
+        </section>
+
+        <section
+          class="section-card"
+          id="history">
+
+          <p class="eyebrow">
+            TU ACTIVIDAD
+          </p>
+
+          <h2>
+            Últimas sesiones
+          </h2>
+
+          <div
+            id="sessionHistory"
+            class="history-list">
+          </div>
+
+        </section>
+
+      </div>
+
+      <!-- FOOTER -->
 
       <footer>
-        <strong>StudyUp</strong> · Hecho para tus metas académicas.
+
+        <strong>StudyUp</strong>
+        · Hecho para tus metas académicas.
+
       </footer>
 
     </main>
+
+    <!-- NAVEGACIÓN INFERIOR -->
+
+    <nav
+      class="bottom-nav"
+      aria-label="Navegación principal">
+
+      <a href="#home" aria-label="Inicio">
+        <span>⌂</span>
+        <small>Inicio</small>
+      </a>
+
+      <a href="#subjects-panel" aria-label="Materias">
+        <span>▤</span>
+        <small>Materias</small>
+      </a>
+
+      <a href="#study" aria-label="Estudiar">
+        <span>◷</span>
+        <small>Estudiar</small>
+      </a>
+
+      <a href="#missions-panel" aria-label="Misiones">
+        <span>✧</span>
+        <small>Misiones</small>
+      </a>
+
+      <a href="#flashcards-panel" aria-label="Repaso">
+        <span>▣</span>
+        <small>Repaso</small>
+      </a>
+
+      <a href="#history" aria-label="Historial">
+        <span>▥</span>
+        <small>Historial</small>
+      </a>
+
+    </nav>
+
   </div>
 
+  <!-- DIÁLOGO NUEVA MATERIA -->
+
   <dialog id="subjectDialog">
+
     <form method="dialog" id="subjectForm">
+
       <h2>Nueva materia</h2>
-      <input id="subjectName" placeholder="Ej. Neuroanatomía" required>
+
+      <label for="subjectName">
+        Nombre de la materia
+      </label>
+
+      <input
+        id="subjectName"
+        placeholder="Ej. Neuroanatomía"
+        required>
+
+      <label for="subjectColor">
+        Color
+      </label>
+
       <select id="subjectColor">
-        <option value="#7c6cff">Violeta</option>
-        <option value="#4aa3ff">Azul</option>
-        <option value="#f2b84b">Dorado</option>
-        <option value="#49c6a5">Verde</option>
+
+        <option value="#7c6cff">
+          Violeta
+        </option>
+
+        <option value="#4aa3ff">
+          Azul
+        </option>
+
+        <option value="#f2b84b">
+          Dorado
+        </option>
+
+        <option value="#49c6a5">
+          Verde
+        </option>
+
       </select>
-      <button class="primary-btn">Crear materia</button>
+
+      <button
+        class="primary-btn"
+        type="submit">
+        Crear materia
+      </button>
+
+      <button
+        class="secondary-btn"
+        type="button"
+        onclick="document.getElementById('subjectDialog').close()">
+        Cancelar
+      </button>
+
     </form>
+
   </dialog>
+
+  <!-- DIÁLOGO NUEVA FLASHCARD -->
 
   <dialog id="cardDialog">
+
     <form method="dialog" id="cardForm">
+
       <h2>Nueva flashcard</h2>
-      <input id="cardFront" placeholder="Pregunta" required>
-      <textarea id="cardBack" placeholder="Respuesta" required></textarea>
-      <button class="primary-btn">Guardar</button>
+
+      <label for="cardFront">
+        Pregunta
+      </label>
+
+      <input
+        id="cardFront"
+        placeholder="Escribí la pregunta"
+        required>
+
+      <label for="cardBack">
+        Respuesta
+      </label>
+
+      <textarea
+        id="cardBack"
+        placeholder="Escribí la respuesta"
+        required>
+      </textarea>
+
+      <button
+        class="primary-btn"
+        type="submit">
+        Guardar flashcard
+      </button>
+
+      <button
+        class="secondary-btn"
+        type="button"
+        onclick="document.getElementById('cardDialog').close()">
+        Cancelar
+      </button>
+
     </form>
+
   </dialog>
 
+  <!-- JAVASCRIPT -->
+
   <script src="app.js"></script>
+
 </body>
 </html>
