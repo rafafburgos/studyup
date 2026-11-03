@@ -1,0 +1,390 @@
+// STUDYUP - CORE SYSTEM
+
+const $ = id => document.getElementById(id);
+
+const defaultData = {
+  xp: 0,
+  sessions: [],
+  subjects: [
+    { id: 1, name: "Anatomía", color: "#4aa3ff", minutes: 0 },
+    { id: 2, name: "Histología", color: "#7c6cff", minutes: 0 },
+    { id: 3, name: "Embriología", color: "#e8b95c", minutes: 0 }
+  ],
+  cards: [],
+  activeDays: []
+};
+
+let data;
+
+try {
+  data = JSON.parse(localStorage.getItem("studyupData")) || defaultData;
+} catch {
+  data = structuredClone(defaultData);
+}
+
+let elapsed = 0;
+let interval = null;
+let running = false;
+let selectedCard = 0;
+
+function saveData() {
+  localStorage.setItem("studyupData", JSON.stringify(data));
+}
+
+function formatTime(seconds) {
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = seconds % 60;
+
+  return [h, m, s]
+    .map(n => String(n).padStart(2, "0"))
+    .join(":");
+}
+
+function updateTimer() {
+  $("timer").textContent = formatTime(elapsed);
+}
+
+function startTimer() {
+  if (running) {
+    clearInterval(interval);
+    running = false;
+    $("startBtn").textContent = "▶ Continuar";
+    return;
+  }
+
+  running = true;
+  $("startBtn").textContent = "Ⅱ Pausar";
+
+  interval = setInterval(() => {
+    elapsed++;
+    updateTimer();
+  }, 1000);
+}
+
+function resetTimer() {
+  clearInterval(interval);
+  running = false;
+  elapsed = 0;
+
+  $("startBtn").textContent = "▶ Iniciar sesión";
+  $("saveBtn").disabled = true;
+
+  updateTimer();
+}
+
+function saveSession() {
+  const subjectId = Number($("subjectSelect").value);
+  const subject = data.subjects.find(s => s.id === subjectId);
+
+  if (!subject || elapsed < 60) {
+    alert("Estudia al menos un minuto para registrar la sesión.");
+    return;
+  }
+
+  const minutes = Math.floor(elapsed / 60);
+  const xpEarned = minutes * 2;
+
+  subject.minutes += minutes;
+  data.xp += xpEarned;
+
+  data.sessions.unshift({
+    subject: subject.name,
+    minutes,
+    xp: xpEarned,
+    date: new Date().toISOString()
+  });
+
+  const today = new Date().toDateString();
+
+  if (!data.activeDays.includes(today)) {
+    data.activeDays.push(today);
+  }
+
+  saveData();
+  resetTimer();
+  render();
+
+  alert(`¡Sesión guardada! +${xpEarned} XP`);
+}
+
+function getRank(hours) {
+  const ranks = [
+    [1, "HIERRO III"],
+    [2, "HIERRO II"],
+    [3, "HIERRO I"],
+    [4, "BRONCE III"],
+    [5, "BRONCE II"],
+    [6, "BRONCE I"],
+    [8, "PLATA III"],
+    [10, "PLATA II"],
+    [12, "PLATA I"],
+    [14, "ORO III"],
+    [16, "ORO II"],
+    [18, "ORO I"],
+    [22, "PLATINO"],
+    [26, "DIAMANTE"],
+    [30, "MAESTRO"]
+  ];
+
+  let rank = "HIERRO III";
+
+  ranks.forEach(([limit, name]) => {
+    if (hours >= limit) rank = name;
+  });
+
+  if (hours >= 35) rank = "GRAN MAESTRO";
+
+  return rank;
+}
+
+function getWeekMinutes() {
+  const now = new Date();
+
+  const monday = new Date(now);
+  monday.setHours(0, 0, 0, 0);
+
+  const day = monday.getDay();
+  monday.setDate(monday.getDate() - (day === 0 ? 6 : day - 1));
+
+  return data.sessions
+    .filter(session => new Date(session.date) >= monday)
+    .reduce((sum, session) => sum + session.minutes, 0);
+}
+
+function calculateStreak() {
+  const days = [...new Set(data.activeDays)];
+
+  let streak = 0;
+  const date = new Date();
+
+  while (days.includes(date.toDateString())) {
+    streak++;
+    date.setDate(date.getDate() - 1);
+  }
+
+  return streak;
+}
+
+function renderStats() {
+  const weeklyMinutes = getWeekMinutes();
+  const weeklyHours = weeklyMinutes / 60;
+
+  $("totalXp").textContent = data.xp;
+  $("level").textContent = Math.floor(data.xp / 500) + 1;
+  $("nextLevel").textContent =
+    `${500 - (data.xp % 500)} XP para subir`;
+
+  $("overallRank").textContent = getRank(weeklyHours);
+  $("weeklyHours").textContent =
+    `${weeklyHours.toFixed(1)} h esta semana`;
+
+  $("streak").textContent = calculateStreak();
+}
+
+function renderSubjects() {
+  const select = $("subjectSelect");
+  const list = $("subjectsList");
+
+  select.innerHTML = "";
+  list.innerHTML = "";
+
+  data.subjects.forEach(subject => {
+    const option = document.createElement("option");
+    option.value = subject.id;
+    option.textContent = subject.name;
+    select.appendChild(option);
+
+    const hours = (subject.minutes / 60).toFixed(1);
+
+    const item = document.createElement("div");
+
+    item.style.cssText = `
+      padding:15px;
+      margin:10px 0;
+      border-radius:12px;
+      background:#171f2d;
+      border-left:4px solid ${subject.color};
+    `;
+
+    item.innerHTML = `
+      <strong>${subject.name}</strong>
+      <p style="color:#8995a9;font-size:12px;margin-top:6px">
+        ${hours} horas estudiadas
+      </p>
+      <small>${getRank(subject.minutes / 60)}</small>
+    `;
+
+    list.appendChild(item);
+  });
+}
+
+function renderMissions() {
+  const minutes = getWeekMinutes();
+
+  const missions = [
+    { title: "Estudia 2 horas", goal: 120 },
+    { title: "Estudia 5 horas", goal: 300 },
+    { title: "Estudia 10 horas", goal: 600 }
+  ];
+
+  $("missions").innerHTML = "";
+
+  let completed = 0;
+
+  missions.forEach(mission => {
+    const done = minutes >= mission.goal;
+
+    if (done) completed++;
+
+    const item = document.createElement("div");
+
+    item.style.cssText = `
+      padding:12px;
+      margin:10px 0;
+      background:#171f2d;
+      border-radius:12px;
+    `;
+
+    item.innerHTML = `
+      <strong>${done ? "✓ " : "○ "}${mission.title}</strong>
+      <p style="font-size:11px;color:#8995a9;margin-top:5px">
+        ${Math.min(minutes, mission.goal)} / ${mission.goal} minutos
+      </p>
+    `;
+
+    $("missions").appendChild(item);
+  });
+
+  $("missionCount").textContent = `${completed}/3`;
+}
+
+function renderHistory() {
+  const history = $("sessionHistory");
+
+  history.innerHTML = "";
+
+  data.sessions.slice(0, 5).forEach(session => {
+    const item = document.createElement("div");
+
+    item.style.cssText = `
+      padding:12px;
+      border-bottom:1px solid #263247;
+      font-size:13px;
+    `;
+
+    item.textContent =
+      `${session.subject} · ${session.minutes} min · +${session.xp} XP`;
+
+    history.appendChild(item);
+  });
+
+  if (!data.sessions.length) {
+    history.textContent = "Todavía no tienes sesiones registradas.";
+  }
+}
+
+function renderFlashcards() {
+  const card = data.cards[selectedCard];
+
+  if (!card) {
+    $("cardQuestion").textContent =
+      "Añade una flashcard para comenzar.";
+    $("cardAnswer").textContent = "";
+    return;
+  }
+
+  $("cardQuestion").textContent = card.front;
+  $("cardAnswer").textContent = card.back;
+  $("cardAnswer").classList.add("hidden");
+}
+
+function render() {
+  renderStats();
+  renderSubjects();
+  renderMissions();
+  renderHistory();
+  renderFlashcards();
+}
+
+$("startBtn").addEventListener("click", startTimer);
+$("resetBtn").addEventListener("click", resetTimer);
+$("saveBtn").addEventListener("click", saveSession);
+
+$("addSubject").addEventListener("click", () => {
+  $("subjectDialog").showModal();
+});
+
+$("manageSubjects").addEventListener("click", () => {
+  $("subjectDialog").showModal();
+});
+
+$("subjectForm").addEventListener("submit", event => {
+  event.preventDefault();
+
+  const name = $("subjectName").value.trim();
+
+  if (!name) return;
+
+  data.subjects.push({
+    id: Date.now(),
+    name,
+    color: $("subjectColor").value,
+    minutes: 0
+  });
+
+  saveData();
+  $("subjectDialog").close();
+  $("subjectForm").reset();
+  render();
+});
+
+$("addCard").addEventListener("click", () => {
+  $("cardDialog").showModal();
+});
+
+$("cardForm").addEventListener("submit", event => {
+  event.preventDefault();
+
+  data.cards.push({
+    front: $("cardFront").value.trim(),
+    back: $("cardBack").value.trim()
+  });
+
+  selectedCard = data.cards.length - 1;
+
+  saveData();
+  $("cardDialog").close();
+  $("cardForm").reset();
+  renderFlashcards();
+});
+
+$("flipCard").addEventListener("click", () => {
+  $("cardAnswer").classList.toggle("hidden");
+});
+
+$("nextCard").addEventListener("click", () => {
+  if (!data.cards.length) return;
+
+  selectedCard = (selectedCard + 1) % data.cards.length;
+  renderFlashcards();
+});
+
+$("themeBtn").addEventListener("click", () => {
+  document.body.classList.toggle("light-mode");
+});
+
+render();
+updateTimer();
+
+$("saveBtn").disabled = true;
+
+setInterval(() => {
+  $("saveBtn").disabled = elapsed < 60;
+}, 1000);
+
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js").catch(console.error);
+  });
+}
