@@ -2,6 +2,38 @@
 
 const $ = id => document.getElementById(id);
 
+// Sistema de notificaciones toast no bloqueante
+function showToast(message) {
+  let toast = $("appToast");
+  if (!toast) {
+    toast = document.createElement("div");
+    toast.id = "appToast";
+    toast.style.cssText = `
+      position: fixed;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1f2a3d;
+      color: #fff;
+      padding: 10px 18px;
+      border-radius: 20px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.4);
+      font-size: 13px;
+      z-index: 1000;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    `;
+    document.body.appendChild(toast);
+  }
+  toast.textContent = message;
+  toast.style.opacity = "1";
+  clearTimeout(toast.timeout);
+  toast.timeout = setTimeout(() => {
+    toast.style.opacity = "0";
+  }, 2500);
+}
+
+// Estructura y persistencia de datos
 const defaultData = {
   xp: 0,
   sessions: [],
@@ -17,13 +49,16 @@ const defaultData = {
 let data;
 
 try {
-  data = JSON.parse(localStorage.getItem("studyupData")) || defaultData;
+  const saved = localStorage.getItem("studyupData");
+  data = saved ? { ...defaultData, ...JSON.parse(saved) } : structuredClone(defaultData);
 } catch {
   data = structuredClone(defaultData);
 }
 
+// Estado del cronómetro preciso
 let elapsed = 0;
-let interval = null;
+let startTime = null;
+let timerRaf = null;
 let running = false;
 let selectedCard = 0;
 
@@ -43,33 +78,41 @@ function formatTime(seconds) {
 
 function updateTimer() {
   $("timer").textContent = formatTime(elapsed);
+  $("saveBtn").disabled = elapsed < 60;
+}
+
+function runTimerLoop() {
+  if (!running) return;
+
+  const now = Date.now();
+  const delta = Math.floor((now - startTime) / 1000);
+  elapsed += delta;
+  startTime = now;
+
+  updateTimer();
+  timerRaf = setTimeout(runTimerLoop, 1000);
 }
 
 function startTimer() {
   if (running) {
-    clearInterval(interval);
     running = false;
+    clearTimeout(timerRaf);
     $("startBtn").textContent = "▶ Continuar";
     return;
   }
 
   running = true;
+  startTime = Date.now();
   $("startBtn").textContent = "Ⅱ Pausar";
-
-  interval = setInterval(() => {
-    elapsed++;
-    updateTimer();
-  }, 1000);
+  runTimerLoop();
 }
 
 function resetTimer() {
-  clearInterval(interval);
   running = false;
+  clearTimeout(timerRaf);
   elapsed = 0;
 
   $("startBtn").textContent = "▶ Iniciar sesión";
-  $("saveBtn").disabled = true;
-
   updateTimer();
 }
 
@@ -77,8 +120,13 @@ function saveSession() {
   const subjectId = Number($("subjectSelect").value);
   const subject = data.subjects.find(s => s.id === subjectId);
 
-  if (!subject || elapsed < 60) {
-    alert("Estudia al menos un minuto para registrar la sesión.");
+  if (!subject) {
+    showToast("Seleccioná una materia válida.");
+    return;
+  }
+
+  if (elapsed < 60) {
+    showToast("Estudiá al menos 1 minuto para registrar la sesión.");
     return;
   }
 
@@ -96,7 +144,6 @@ function saveSession() {
   });
 
   const today = new Date().toDateString();
-
   if (!data.activeDays.includes(today)) {
     data.activeDays.push(today);
   }
@@ -105,42 +152,38 @@ function saveSession() {
   resetTimer();
   render();
 
-  alert(`¡Sesión guardada! +${xpEarned} XP`);
+  showToast(`¡Sesión guardada! Ganaste +${xpEarned} XP`);
 }
 
 function getRank(hours) {
   const ranks = [
-    [1, "HIERRO III"],
-    [2, "HIERRO II"],
-    [3, "HIERRO I"],
-    [4, "BRONCE III"],
-    [5, "BRONCE II"],
-    [6, "BRONCE I"],
-    [8, "PLATA III"],
-    [10, "PLATA II"],
-    [12, "PLATA I"],
-    [14, "ORO III"],
-    [16, "ORO II"],
-    [18, "ORO I"],
-    [22, "PLATINO"],
+    [35, "GRAN MAESTRO"],
+    [30, "MAESTRO"],
     [26, "DIAMANTE"],
-    [30, "MAESTRO"]
+    [22, "PLATINO"],
+    [18, "ORO I"],
+    [16, "ORO II"],
+    [14, "ORO III"],
+    [12, "PLATA I"],
+    [10, "PLATA II"],
+    [8, "PLATA III"],
+    [6, "BRONCE I"],
+    [5, "BRONCE II"],
+    [4, "BRONCE III"],
+    [3, "HIERRO I"],
+    [2, "HIERRO II"],
+    [1, "HIERRO III"]
   ];
 
-  let rank = "HIERRO III";
+  for (const [limit, name] of ranks) {
+    if (hours >= limit) return name;
+  }
 
-  ranks.forEach(([limit, name]) => {
-    if (hours >= limit) rank = name;
-  });
-
-  if (hours >= 35) rank = "GRAN MAESTRO";
-
-  return rank;
+  return "HIERRO III";
 }
 
 function getWeekMinutes() {
   const now = new Date();
-
   const monday = new Date(now);
   monday.setHours(0, 0, 0, 0);
 
@@ -153,12 +196,16 @@ function getWeekMinutes() {
 }
 
 function calculateStreak() {
-  const days = [...new Set(data.activeDays)];
-
+  const days = new Set(data.activeDays);
   let streak = 0;
   const date = new Date();
 
-  while (days.includes(date.toDateString())) {
+  // Si hoy no se estudió todavía, comprobar si ayer estuvo activo
+  if (!days.has(date.toDateString())) {
+    date.setDate(date.getDate() - 1);
+  }
+
+  while (days.has(date.toDateString())) {
     streak++;
     date.setDate(date.getDate() - 1);
   }
@@ -172,13 +219,10 @@ function renderStats() {
 
   $("totalXp").textContent = data.xp;
   $("level").textContent = Math.floor(data.xp / 500) + 1;
-  $("nextLevel").textContent =
-    `${500 - (data.xp % 500)} XP para subir`;
+  $("nextLevel").textContent = `${500 - (data.xp % 500)} XP para subir`;
 
   $("overallRank").textContent = getRank(weeklyHours);
-  $("weeklyHours").textContent =
-    `${weeklyHours.toFixed(1)} h esta semana`;
-
+  $("weeklyHours").textContent = `${weeklyHours.toFixed(1)} h esta semana`;
   $("streak").textContent = calculateStreak();
 }
 
@@ -190,70 +234,61 @@ function renderSubjects() {
   list.innerHTML = "";
 
   data.subjects.forEach(subject => {
+    // Opción para el selector del cronómetro
     const option = document.createElement("option");
     option.value = subject.id;
     option.textContent = subject.name;
     select.appendChild(option);
 
+    // Tarjeta visual en el listado de materias
     const hours = (subject.minutes / 60).toFixed(1);
-
     const item = document.createElement("div");
+    item.className = "subject-card";
+    item.style.borderLeft = `4px solid ${subject.color}`;
 
-    item.style.cssText = `
-      padding:15px;
-      margin:10px 0;
-      border-radius:12px;
-      background:#171f2d;
-      border-left:4px solid ${subject.color};
-    `;
+    const title = document.createElement("strong");
+    title.textContent = subject.name;
 
-    item.innerHTML = `
-      <strong>${subject.name}</strong>
-      <p style="color:#8995a9;font-size:12px;margin-top:6px">
-        ${hours} horas estudiadas
-      </p>
-      <small>${getRank(subject.minutes / 60)}</small>
-    `;
+    const subtitle = document.createElement("p");
+    subtitle.className = "muted";
+    subtitle.textContent = `${hours} horas estudiadas`;
 
+    const rankBadge = document.createElement("small");
+    rankBadge.textContent = getRank(subject.minutes / 60);
+
+    item.append(title, subtitle, rankBadge);
     list.appendChild(item);
   });
 }
 
 function renderMissions() {
   const minutes = getWeekMinutes();
-
   const missions = [
-    { title: "Estudia 2 horas", goal: 120 },
-    { title: "Estudia 5 horas", goal: 300 },
-    { title: "Estudia 10 horas", goal: 600 }
+    { title: "Estudiá 2 horas", goal: 120 },
+    { title: "Estudiá 5 horas", goal: 300 },
+    { title: "Estudiá 10 horas", goal: 600 }
   ];
 
-  $("missions").innerHTML = "";
-
+  const container = $("missions");
+  container.innerHTML = "";
   let completed = 0;
 
   missions.forEach(mission => {
     const done = minutes >= mission.goal;
-
     if (done) completed++;
 
     const item = document.createElement("div");
+    item.className = "mission-item";
 
-    item.style.cssText = `
-      padding:12px;
-      margin:10px 0;
-      background:#171f2d;
-      border-radius:12px;
-    `;
+    const title = document.createElement("strong");
+    title.textContent = `${done ? "✓ " : "○ "}${mission.title}`;
 
-    item.innerHTML = `
-      <strong>${done ? "✓ " : "○ "}${mission.title}</strong>
-      <p style="font-size:11px;color:#8995a9;margin-top:5px">
-        ${Math.min(minutes, mission.goal)} / ${mission.goal} minutos
-      </p>
-    `;
+    const progress = document.createElement("p");
+    progress.className = "muted";
+    progress.textContent = `${Math.min(minutes, mission.goal)} / ${mission.goal} minutos`;
 
-    $("missions").appendChild(item);
+    item.append(title, progress);
+    container.appendChild(item);
   });
 
   $("missionCount").textContent = `${completed}/3`;
@@ -261,39 +296,34 @@ function renderMissions() {
 
 function renderHistory() {
   const history = $("sessionHistory");
-
   history.innerHTML = "";
 
-  data.sessions.slice(0, 5).forEach(session => {
-    const item = document.createElement("div");
-
-    item.style.cssText = `
-      padding:12px;
-      border-bottom:1px solid #263247;
-      font-size:13px;
-    `;
-
-    item.textContent =
-      `${session.subject} · ${session.minutes} min · +${session.xp} XP`;
-
-    history.appendChild(item);
-  });
-
   if (!data.sessions.length) {
-    history.textContent = "Todavía no tienes sesiones registradas.";
-  }
-}
-
-function renderFlashcards() {
-  const card = data.cards[selectedCard];
-
-  if (!card) {
-    $("cardQuestion").textContent =
-      "Añade una flashcard para comenzar.";
-    $("cardAnswer").textContent = "";
+    history.textContent = "Todavía no tenés sesiones registradas.";
     return;
   }
 
+  data.sessions.slice(0, 5).forEach(session => {
+    const item = document.createElement("div");
+    item.className = "history-item";
+    item.textContent = `${session.subject} · ${session.minutes} min · +${session.xp} XP`;
+    history.appendChild(item);
+  });
+}
+
+function renderFlashcards() {
+  if (!data.cards.length) {
+    $("cardQuestion").textContent = "Añadí una flashcard para comenzar.";
+    $("cardAnswer").textContent = "";
+    $("cardAnswer").classList.add("hidden");
+    return;
+  }
+
+  if (selectedCard >= data.cards.length) {
+    selectedCard = 0;
+  }
+
+  const card = data.cards[selectedCard];
   $("cardQuestion").textContent = card.front;
   $("cardAnswer").textContent = card.back;
   $("cardAnswer").classList.add("hidden");
@@ -306,6 +336,8 @@ function render() {
   renderHistory();
   renderFlashcards();
 }
+
+// EVENT LISTENERS
 
 $("startBtn").addEventListener("click", startTimer);
 $("resetBtn").addEventListener("click", resetTimer);
@@ -321,7 +353,6 @@ $("manageSubjects").addEventListener("click", () => {
 
 $("subjectForm").addEventListener("submit", event => {
   event.preventDefault();
-
   const name = $("subjectName").value.trim();
 
   if (!name) return;
@@ -337,6 +368,7 @@ $("subjectForm").addEventListener("submit", event => {
   $("subjectDialog").close();
   $("subjectForm").reset();
   render();
+  showToast("¡Materia agregada correctamente!");
 });
 
 $("addCard").addEventListener("click", () => {
@@ -346,45 +378,61 @@ $("addCard").addEventListener("click", () => {
 $("cardForm").addEventListener("submit", event => {
   event.preventDefault();
 
-  data.cards.push({
-    front: $("cardFront").value.trim(),
-    back: $("cardBack").value.trim()
-  });
+  const front = $("cardFront").value.trim();
+  const back = $("cardBack").value.trim();
 
+  if (!front || !back) {
+    showToast("Completá tanto la pregunta como la respuesta.");
+    return;
+  }
+
+  data.cards.push({ front, back });
   selectedCard = data.cards.length - 1;
 
   saveData();
   $("cardDialog").close();
   $("cardForm").reset();
   renderFlashcards();
+  showToast("¡Flashcard creada!");
 });
 
 $("flipCard").addEventListener("click", () => {
+  if (!data.cards.length) return;
   $("cardAnswer").classList.toggle("hidden");
 });
 
 $("nextCard").addEventListener("click", () => {
   if (!data.cards.length) return;
-
   selectedCard = (selectedCard + 1) % data.cards.length;
   renderFlashcards();
 });
 
+// Gestión y persistencia del tema visual
+const savedTheme = localStorage.getItem("studyupTheme");
+if (savedTheme === "light") {
+  document.body.classList.add("light-mode");
+}
+
 $("themeBtn").addEventListener("click", () => {
-  document.body.classList.toggle("light-mode");
+  const isLight = document.body.classList.toggle("light-mode");
+  localStorage.setItem("studyupTheme", isLight ? "light" : "dark");
 });
 
-render();
-updateTimer();
+// Advertencia al intentar salir si hay estudio en curso
+window.addEventListener("beforeunload", event => {
+  if (running && elapsed >= 60) {
+    event.preventDefault();
+    event.returnValue = "";
+  }
+});
 
-$("saveBtn").disabled = true;
-
-setInterval(() => {
-  $("saveBtn").disabled = elapsed < 60;
-}, 1000);
-
+// Registro de Service Worker para capacidades PWA
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
     navigator.serviceWorker.register("./sw.js").catch(console.error);
   });
 }
+
+// Inicialización
+render();
+updateTimer();
