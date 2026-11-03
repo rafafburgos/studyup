@@ -1,13 +1,13 @@
 {
-  "name": "StudyUp",
+  "name": "StudyUp 3.0",
   "short_name": "StudyUp",
-  "description": "Study smarter. Rank higher.",
+  "description": "Flashcards desde PDF, sesiones temporizadas Pomodoro y ranking semanal.",
   "lang": "es",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "any",
-  "background_color": "#0a0d14",
-  "theme_color": "#0a0d14",
+  "background_color": "#070b14",
+  "theme_color": "#070b14",
   "categories": ["education", "productivity"]
 }
