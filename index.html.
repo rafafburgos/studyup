@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0a0d14">
+  <title>StudyUp | Study smarter. Rank higher.</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+  <div class="app-shell">
+
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark">S<span>+</span></span>
+        <div>
+          <strong>Study<span>Up</span></strong>
+          <small>STUDY SMARTER. RANK HIGHER.</small>
+        </div>
+      </div>
+      <button id="themeBtn" class="icon-btn">☼</button>
+    </header>
+
+    <main>
+
+      <section class="welcome">
+        <div>
+          <p class="eyebrow">TU PROGRESO, TU JUEGO</p>
+          <h1>Subí de nivel.<br><span>Domina tus materias.</span></h1>
+          <p class="muted">Cada minuto cuenta. Hoy es un buen día para avanzar.</p>
+        </div>
+
+        <div class="rank-badge">
+          <span>RANGO SEMANAL</span>
+          <strong id="overallRank">HIERRO III</strong>
+          <div class="rank-gem">✦</div>
+          <small id="weeklyHours">0.0 h esta semana</small>
+        </div>
+      </section>
+
+      <section class="stats-grid">
+        <article class="stat-card">
+          <span class="stat-label">XP TOTAL</span>
+          <strong id="totalXp">0</strong>
+          <small>Experiencia acumulada</small>
+        </article>
+
+        <article class="stat-card">
+          <span class="stat-label">NIVEL</span>
+          <strong id="level">1</strong>
+          <small id="nextLevel">500 XP para subir</small>
+        </article>
+
+        <article class="stat-card">
+          <span class="stat-label">RACHA</span>
+          <strong><span id="streak">0</span> días</strong>
+          <small>¡No rompas el ritmo!</small>
+        </article>
+      </section>
+
+      <section class="section-card timer-card">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">MODO ENFOQUE</p>
+            <h2>Sesión de estudio</h2>
+          </div>
+        </div>
+
+        <label for="subjectSelect">¿Qué vas a estudiar?</label>
+
+        <div class="timer-controls">
+          <select id="subjectSelect"></select>
+          <button id="addSubject" class="secondary-btn">＋ Materia</button>
+        </div>
+
+        <div class="timer-display" id="timer">00:00:00</div>
+
+        <div class="timer-actions">
+          <button id="startBtn" class="primary-btn">▶ Iniciar sesión</button>
+          <button id="resetBtn" class="secondary-btn">↺ Reiniciar</button>
+          <button id="saveBtn" class="secondary-btn" disabled>✓ Guardar</button>
+        </div>
+
+        <p class="hint">Ganas 2 XP por minuto de estudio registrado.</p>
+      </section>
+
+      <section class="content-grid">
+
+        <section class="section-card">
+          <p class="eyebrow">TU UNIVERSIDAD</p>
+          <h2>Mis materias</h2>
+          <div id="subjectsList"></div>
+          <button id="manageSubjects" class="text-btn">Gestionar materias</button>
+        </section>
+
+        <section class="section-card">
+          <p class="eyebrow">SIGUE AVANZANDO</p>
+          <h2>Misiones semanales</h2>
+          <span id="missionCount">0/3</span>
+          <div id="missions"></div>
+        </section>
+
+      </section>
+
+      <section class="content-grid">
+
+        <section class="section-card">
+          <p class="eyebrow">REPASO ACTIVO</p>
+          <h2>Flashcards</h2>
+
+          <div id="flashcard">
+            <p id="cardQuestion">Añade una flashcard para comenzar.</p>
+            <p id="cardAnswer" class="hidden"></p>
+            <button id="flipCard" class="secondary-btn">Mostrar respuesta</button>
+            <button id="nextCard" class="text-btn">Siguiente →</button>
+          </div>
+
+          <button id="addCard" class="text-btn">＋ Crear flashcard</button>
+        </section>
+
+        <section class="section-card">
+          <p class="eyebrow">TU ACTIVIDAD</p>
+          <h2>Últimas sesiones</h2>
+          <div id="sessionHistory"></div>
+        </section>
+
+      </section>
+
+      <footer>
+        <strong>StudyUp</strong> · Hecho para tus metas académicas.
+      </footer>
+
+    </main>
+  </div>
+
+  <dialog id="subjectDialog">
+    <form method="dialog" id="subjectForm">
+      <h2>Nueva materia</h2>
+      <input id="subjectName" placeholder="Ej. Neuroanatomía" required>
+      <select id="subjectColor">
+        <option value="#7c6cff">Violeta</option>
+        <option value="#4aa3ff">Azul</option>
+        <option value="#f2b84b">Dorado</option>
+        <option value="#49c6a5">Verde</option>
+      </select>
+      <button class="primary-btn">Crear materia</button>
+    </form>
+  </dialog>
+
+  <dialog id="cardDialog">
+    <form method="dialog" id="cardForm">
+      <h2>Nueva flashcard</h2>
+      <input id="cardFront" placeholder="Pregunta" required>
+      <textarea id="cardBack" placeholder="Respuesta" required></textarea>
+      <button class="primary-btn">Guardar</button>
+    </form>
+  </dialog>
+
+  <script src="app.js"></script>
+</body>
+</html>
