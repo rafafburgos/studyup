@@ -10,6 +10,36 @@
 
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="styles.css">
+
+  <style>
+    /* Ajustes visuales para cabeceras con botón de retorno */
+    .dialog-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .dialog-header h2 {
+      margin: 0;
+    }
+
+    .section-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+    }
+
+    .back-btn-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      text-decoration: none;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+  </style>
 </head>
 
 <body>
@@ -153,9 +183,14 @@
 
           <div>
 
-            <p class="eyebrow">
-              MODO ENFOQUE
-            </p>
+            <div class="section-header-row">
+              <p class="eyebrow">
+                MODO ENFOQUE
+              </p>
+              <a href="#home-section" class="text-btn back-btn-link" aria-label="Volver al inicio">
+                ← Volver
+              </a>
+            </div>
 
             <h2>
               Sesión de estudio
@@ -235,9 +270,14 @@
           class="section-card"
           id="subjects-panel">
 
-          <p class="eyebrow">
-            TU UNIVERSIDAD
-          </p>
+          <div class="section-header-row">
+            <p class="eyebrow">
+              TU UNIVERSIDAD
+            </p>
+            <a href="#home-section" class="text-btn back-btn-link" aria-label="Volver al inicio">
+              ← Volver
+            </a>
+          </div>
 
           <h2>
             Mis materias
@@ -261,9 +301,14 @@
           class="section-card"
           id="missions-panel">
 
-          <p class="eyebrow">
-            SEGUÍ AVANZANDO
-          </p>
+          <div class="section-header-row">
+            <p class="eyebrow">
+              SEGUÍ AVANZANDO
+            </p>
+            <a href="#home-section" class="text-btn back-btn-link" aria-label="Volver al inicio">
+              ← Volver
+            </a>
+          </div>
 
           <h2>
             Misiones semanales
@@ -287,9 +332,14 @@
           class="section-card"
           id="flashcards-panel">
 
-          <p class="eyebrow">
-            REPASO ACTIVO
-          </p>
+          <div class="section-header-row">
+            <p class="eyebrow">
+              REPASO ACTIVO
+            </p>
+            <a href="#home-section" class="text-btn back-btn-link" aria-label="Volver al inicio">
+              ← Volver
+            </a>
+          </div>
 
           <h2>
             Flashcards
@@ -341,9 +391,14 @@
           class="section-card"
           id="history">
 
-          <p class="eyebrow">
-            TU ACTIVIDAD
-          </p>
+          <div class="section-header-row">
+            <p class="eyebrow">
+              TU ACTIVIDAD
+            </p>
+            <a href="#home-section" class="text-btn back-btn-link" aria-label="Volver al inicio">
+              ← Volver
+            </a>
+          </div>
 
           <h2>
             Últimas sesiones
@@ -415,7 +470,16 @@
 
     <form method="dialog" id="subjectForm">
 
-      <h2>Nueva materia</h2>
+      <div class="dialog-header">
+        <button
+          class="icon-btn"
+          type="button"
+          onclick="document.getElementById('subjectDialog').close()"
+          aria-label="Volver atrás">
+          ←
+        </button>
+        <h2>Nueva materia</h2>
+      </div>
 
       <label for="subjectName">
         Nombre de la materia
@@ -460,7 +524,7 @@
         class="secondary-btn"
         type="button"
         onclick="document.getElementById('subjectDialog').close()">
-        Cancelar
+        ← Volver atrás
       </button>
 
     </form>
@@ -473,7 +537,16 @@
 
     <form method="dialog" id="cardForm">
 
-      <h2>Nueva flashcard</h2>
+      <div class="dialog-header">
+        <button
+          class="icon-btn"
+          type="button"
+          onclick="document.getElementById('cardDialog').close()"
+          aria-label="Volver atrás">
+          ←
+        </button>
+        <h2>Nueva flashcard</h2>
+      </div>
 
       <label for="cardFront">
         Pregunta
@@ -504,7 +577,7 @@
         class="secondary-btn"
         type="button"
         onclick="document.getElementById('cardDialog').close()">
-        Cancelar
+        ← Volver atrás
       </button>
 
     </form>
